@@ -348,7 +348,9 @@ class CI_Input {
 		}
 		else
 		{
-			$this->ip_address = $_SERVER['REMOTE_ADDR'];
+//			$this->ip_address = $_SERVER['REMOTE_ADDR'];
+//      Codeigniter bug v2.1.3
+      $this->ip_address = $this->server('remote_addr');
 		}
 
 		if ( ! $this->valid_ip($this->ip_address))
@@ -633,7 +635,7 @@ class CI_Input {
 
 			foreach ($_COOKIE as $key => $val)
 			{
-				$_COOKIE[$this->_clean_input_keys($key)] = $this->_clean_input_data($val);
+				$_COOKIE[$this->_clean_input_keys_cookie($key)] = $this->_clean_input_data($val);
 			}
 		}
 
@@ -739,6 +741,35 @@ class CI_Input {
 
 		return $str;
 	}
+
+  // --------------------------------------------------------------------
+
+  /**
+   * Clean Keys - only from cookie
+   *
+   * This is a helper function. To prevent malicious users
+   * from trying to exploit keys we make sure that keys are
+   * only named with alpha-numeric text and a few other items.
+   *
+   * @access	private
+   * @param	string
+   * @return	string
+   */
+  function _clean_input_keys_cookie($str)
+  {
+    if ( ! preg_match("/^[a-z0-9:_\/-@]+$/i", $str))
+    {
+      exit('Disallowed Key Characters.');
+    }
+
+    // Clean UTF-8 if supported
+    if (UTF8_ENABLED === TRUE)
+    {
+      $str = $this->uni->clean_string($str);
+    }
+
+    return $str;
+  }
 
 	// --------------------------------------------------------------------
 
